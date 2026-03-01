@@ -1,0 +1,18 @@
+{
+  "name": "my-first-app",
+  "version": "1.0.0",
+  "description": "This is my first vibe coding project. It's a simple web app built with plain HTML, CSS, and JavaScript — no frameworks required.",
+  "main": "script.js",
+  "scripts": {
+    "start": "node server.js",
+    "preview": "live-server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1"
+  }
+}

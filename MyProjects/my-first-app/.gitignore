@@ -1,0 +1,35 @@
+# node_modules/
+# The folder npm creates when you run "npm install".
+# It can contain hundreds of thousands of files — never commit it.
+# Anyone can recreate it with "npm install" using your package.json.
+node_modules/
+
+# .env
+# Your secret keys and passwords live here.
+# NEVER commit this file. If it ends up on GitHub, anyone can steal your keys.
+.env
+.env.local
+.env.*.local
+
+# .DS_Store
+# macOS creates this invisible file in every folder.
+# It stores view preferences. Useless to anyone else; annoying in repos.
+.DS_Store
+
+# Thumbs.db / desktop.ini
+# Windows equivalents of .DS_Store.
+Thumbs.db
+desktop.ini
+
+# Logs — auto-generated error/debug output, not source code
+*.log
+npm-debug.log*
+
+# Build output — generated files, not source code
+dist/
+build/
+.cache/
+
+# Editor-specific folders
+.vscode/settings.json
+.idea/
