@@ -1,0 +1,19 @@
+{
+  "name": "linkedin-analyzer",
+  "version": "1.0.0",
+  "description": "Analyze a LinkedIn profile and surface the person's top 3 professional priorities using Claude AI",
+  "main": "analyze.js",
+  "scripts": {
+    "start": "node analyze.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
+    "axios": "^1.13.6",
+    "cheerio": "^1.2.0",
+    "readline-sync": "^1.4.10"
+  }
+}
