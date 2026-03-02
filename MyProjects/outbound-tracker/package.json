@@ -1,0 +1,21 @@
+{
+  "name": "outbound-tracker",
+  "version": "1.0.0",
+  "description": "Track outbound activities and behaviors across stage 1+ sales opportunities",
+  "main": "tracker.js",
+  "scripts": {
+    "start": "node tracker.js",
+    "dashboard": "node tracker.js dashboard",
+    "list": "node tracker.js list",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "better-sqlite3": "^12.6.2",
+    "chalk": "^4.1.2",
+    "cli-table3": "^0.6.5",
+    "date-fns": "^4.1.0"
+  }
+}
