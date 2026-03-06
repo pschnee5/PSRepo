@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DevOps Hiring Radar</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- ── Header ─────────────────────────────────────────── -->
+  <header class="header">
+    <div>
+      <div class="h-title">⚡ DevOps Hiring Radar</div>
+      <div class="h-sub">Platform · SRE · DevOps · DevSecOps · Cloud Ops — 50–500 Employees</div>
+      <div class="h-time" id="lastRunTime"></div>
+    </div>
+    <button class="scan-btn" id="scanBtn">↻ Scan Now</button>
+  </header>
+
+  <!-- ── Body ───────────────────────────────────────────── -->
+  <main class="body">
+    <!-- Progress indicator (hidden by default) -->
+    <div class="prog" id="progress" style="display:none">
+      <div class="spin"></div>
+      <span id="progressText">Searching all roles…</span>
+    </div>
+
+    <!-- Error banner (hidden by default) -->
+    <div class="err" id="errorBanner" style="display:none"></div>
+
+    <!-- Empty state -->
+    <div class="empty" id="emptyState">
+      <div class="empty-icon">📡</div>
+      <div class="empty-t">No results yet</div>
+      <div class="empty-s">Press "Scan Now" to pull today's postings</div>
+    </div>
+
+    <!-- Results area -->
+    <div id="results" style="display:none">
+      <div class="meta">Showing <span id="jobCount" class="count-highlight">0</span> job<span id="jobPlural">s</span></div>
+      <div class="grid" id="jobGrid"></div>
+    </div>
+
+    <!-- Raw fallback (shown when Claude returns text we can't parse into cards) -->
+    <div id="rawFallback" style="display:none">
+      <div class="raw-label">Raw results</div>
+      <pre id="rawText" class="raw-pre"></pre>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

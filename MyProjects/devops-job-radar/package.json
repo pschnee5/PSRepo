@@ -1,0 +1,17 @@
+{
+  "name": "devops-job-radar",
+  "version": "1.0.0",
+  "description": "Scans the web for DevOps/Platform/SRE/DevSecOps job postings at 50–500 person companies using Claude with web search.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1"
+  }
+}
