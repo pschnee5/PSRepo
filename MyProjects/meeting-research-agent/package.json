@@ -1,0 +1,19 @@
+{
+  "name": "meeting-research-agent",
+  "version": "1.0.0",
+  "description": "AI-powered meeting prep agent — researches companies before your meetings so you walk in sharp",
+  "main": "research.js",
+  "scripts": {
+    "start": "node research.js",
+    "prep": "node research.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
+    "chalk": "^4.1.2",
+    "better-sqlite3": "^11.0.0",
+    "dotenv": "^16.4.5"
+  }
+}
