@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>March Madness 2026 - Player Tracker</title>
+    <style>
+        :root {
+            --primary: #ff6b35;
+            --primary-dark: #e55a2b;
+            --bg-dark: #0a0e27;
+            --bg-card: #141937;
+            --bg-card-hover: #1a2147;
+            --text: #e8e8e8;
+            --text-muted: #8892b0;
+            --accent-green: #64ffda;
+            --accent-blue: #5ce1e6;
+            --accent-yellow: #ffd700;
+            --border: #233060;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 3px solid var(--primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ff6b35' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--primary), var(--accent-yellow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .tournament-badge {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0.75rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .summary-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-stat {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+
+        .summary-stat .label {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .summary-stat .value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent-green);
+            margin-top: 0.25rem;
+        }
+
+        .players-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .player-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .player-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 107, 53, 0.15);
+        }
+
+        .player-card .team-stripe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .player-info h2 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .player-info .team {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+        }
+
+        .player-info .team .seed {
+            background: var(--border);
+            padding: 0.1rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-left: 0.5rem;
+        }
+
+        .season-ppg {
+            text-align: right;
+        }
+
+        .season-ppg .number {
+            font-size: 2rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .season-ppg .label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 0.6rem;
+            text-align: center;
+        }
+
+        .stat-box .stat-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .stat-box .stat-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 0.15rem;
+        }
+
+        .prediction-section {
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.08), rgba(100, 255, 218, 0.05));
+            border: 1px solid rgba(255, 107, 53, 0.2);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .prediction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .prediction-header h3 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary);
+        }
+
+        .prediction-header .confidence {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .confidence-high {
+            background: rgba(100, 255, 218, 0.15);
+            color: var(--accent-green);
+        }
+
+        .confidence-medium {
+            background: rgba(255, 215, 0, 0.15);
+            color: var(--accent-yellow);
+        }
+
+        .prediction-scenarios {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        .scenario {
+            text-align: center;
+            padding: 0.5rem;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .scenario .round-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .scenario .points {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-top: 0.1rem;
+        }
+
+        .scenario .games {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .scenario-sweet16 .points { color: var(--accent-blue); }
+        .scenario-elite8 .points { color: var(--accent-yellow); }
+        .scenario-final4 .points { color: var(--accent-green); }
+
+        .highlight-bar {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 0.6rem 0.75rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .highlight-bar .icon {
+            font-size: 1rem;
+        }
+
+        .highlight-bar strong {
+            color: var(--accent-yellow);
+        }
+
+        .leaderboard {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .leaderboard h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .leaderboard-table th {
+            text-align: left;
+            padding: 0.75rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .leaderboard-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(35, 48, 96, 0.5);
+            font-size: 0.95rem;
+        }
+
+        .leaderboard-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .rank-1 { color: var(--accent-yellow); font-weight: 700; }
+        .rank-2 { color: #c0c0c0; font-weight: 600; }
+        .rank-3 { color: #cd7f32; font-weight: 600; }
+
+        .bar-graph {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .bar {
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent-yellow));
+            transition: width 0.5s ease;
+        }
+
+        .methodology {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .methodology h2 {
+            font-size: 1.1rem;
+            color: var(--accent-blue);
+            margin-bottom: 0.75rem;
+        }
+
+        .methodology p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .methodology ul {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            line-height: 1.8;
+            padding-left: 1.5rem;
+        }
+
+        .last-updated {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 2rem;
+            padding-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .players-grid {
+                grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .prediction-scenarios {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>March Madness 2026</h1>
+    <p>Player Scoring Tracker & Predictions</p>
+    <span class="tournament-badge">NCAA Tournament - Live Tracking</span>
+</div>
+
+<div class="container">
+
+    <div class="summary-bar">
+        <div class="summary-stat">
+            <div class="label">Players Tracked</div>
+            <div class="value">6</div>
+        </div>
+        <div class="summary-stat">
+            <div class="label">Avg Season PPG</div>
+            <div class="value">17.1</div>
+        </div>
+        <div class="summary-stat">
+            <div class="label">Highest PPG</div>
+            <div class="value">20.3</div>
+        </div>
+        <div class="summary-stat">
+            <div class="label">Combined Predicted Pts (6 games)</div>
+            <div class="value">618</div>
+        </div>
+    </div>
+
+    <div class="players-grid" id="playersGrid">
+
+        <!-- Izaiyah Nelson -->
+        <div class="player-card">
+            <div class="team-stripe" style="background: linear-gradient(90deg, #006747, #CFC493);"></div>
+            <div class="player-header">
+                <div class="player-info">
+                    <h2>Izaiyah Nelson</h2>
+                    <div class="team">USF Bulls <span class="seed">#12 Seed</span></div>
+                </div>
+                <div class="season-ppg">
+                    <div class="number" style="color: #006747;">15.8</div>
+                    <div class="label">Season PPG</div>
+                </div>
+            </div>
+            <div class="stats-row">
+                <div class="stat-box">
+                    <div class="stat-value">9.8</div>
+                    <div class="stat-label">RPG</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">56.2%</div>
+                    <div class="stat-label">FG%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">1.6</div>
+                    <div class="stat-label">SPG</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">1.4</div>
+                    <div class="stat-label">BPG</div>
+                </div>
+            </div>
+            <div class="prediction-section">
+                <div class="prediction-header">
+                    <h3>Tournament Scoring Prediction</h3>
+                    <span class="confidence confidence-medium">Medium Confidence</span>
+                </div>
+                <div class="prediction-scenarios">
+                    <div class="scenario scenario-sweet16">
+                        <div class="round-label">Sweet 16</div>
+                        <div class="points">50</div>
+                        <div class="games">3 games</div>
+                    </div>
+                    <div class="scenario scenario-elite8">
+                        <div class="round-label">Elite 8</div>
+                        <div class="points">68</div>
+                        <div class="games">4 games</div>
+                    </div>
+                    <div class="scenario scenario-final4">
+                        <div class="round-label">Final Four+</div>
+                        <div class="points">98</div>
+                        <div class="games">6 games</div>
+                    </div>
+                </div>
+            </div>
+            <div class="highlight-bar">
+                <span class="icon">&#11088;</span> Conference POY, DPOY & Newcomer of Year sweep. 18 double-doubles (5th nationally). Career-high <strong>1,000 rebounds</strong> milestone.
+            </div>
+        </div>
+
+        <!-- Nick Boyd -->
+        <div class="player-card">
+            <div class="team-stripe" style="background: linear-gradient(90deg, #C5050C, #FFFFFF);"></div>
+            <div class="player-header">
+                <div class="player-info">
+                    <h2>Nick Boyd</h2>
+                    <div class="team">Wisconsin Badgers <span class="seed">#5 Seed</span></div>
+                </div>
+                <div class="season-ppg">
+                    <div class="number" style="color: #C5050C;">20.3</div>
+                    <div class="label">Season PPG</div>
+                </div>
+            </div>
+            <div class="stats-row">
+                <div class="stat-box">
+                    <div class="stat-value">3.8</div>
+                    <div class="stat-label">RPG</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">4.2</div>
+                    <div class="stat-label">APG</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">47.6%</div>
+                    <div class="stat-label">FG%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">81.0%</div>
+                    <div class="stat-label">FT%</div>
+                </div>
+            </div>
+            <div class="prediction-section">
+                <div class="prediction-header">
+                    <h3>Tournament Scoring Prediction</h3>
+                    <span class="confidence confidence-high">High Confidence</span>
+                </div>
+                <div class="prediction-scenarios">
+                    <div class="scenario scenario-sweet16">
+                        <div class="round-label">Sweet 16</div>
+                        <div class="points">65</div>
+                        <div class="games">3 games</div>
+                    </div>
+                    <div class="scenario scenario-elite8">
+                        <div class="round-label">Elite 8</div>
+                        <div class="points">88</div>
+                        <div class="games">4 games</div>
+                    </div>
+                    <div class="scenario scenario-final4">
+                        <div class="round-label">Final Four+</div>
+                        <div class="points">126</div>
+                        <div class="games">6 games</div>
+                    </div>
+                </div>
+            </div>
+            <div class="highlight-bar">
+                <span class="icon">&#128293;</span> First Badger to avg 20 PPG since Michael Finley (1995). Career-high <strong>36 pts</strong> vs Providence. <strong>21 twenty-point games</strong> this season.
+            </div>
+        </div>
+
+        <!-- Alex Karaban -->
+        <div class="player-card">
+            <div class="team-stripe" style="background: linear-gradient(90deg, #000E2F, #FFFFFF);"></div>
+            <div class="player-header">
+                <div class="player-info">
+                    <h2>Alex Karaban</h2>
+                    <div class="team">UConn Huskies <span class="seed">#2 Seed</span></div>
+                </div>
+                <div class="season-ppg">
+                    <div class="number" style="color: #000E2F;">13.3</div>
+                    <div class="label">Season PPG</div>
+                </div>
+            </div>
+            <div class="stats-row">
+                <div class="stat-box">
+                    <div class="stat-value">5.2</div>
+                    <div class="stat-label">RPG</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">2.2</div>
+                    <div class="stat-label">APG</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">48.8%</div>
+                    <div class="stat-label">FG%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">88.0%</div>
+                    <div class="stat-label">FT%</div>
+                </div>
+            </div>
+            <div class="prediction-section">
+                <div class="prediction-header">
+                    <h3>Tournament Scoring Prediction</h3>
+                    <span class="confidence confidence-high">High Confidence</span>
+                </div>
+                <div class="prediction-scenarios">
+                    <div class="scenario scenario-sweet16">
+                        <div class="round-label">Sweet 16</div>
+                        <div class="points">44</div>
+                        <div class="games">3 games</div>
+                    </div>
+                    <div class="scenario scenario-elite8">
+                        <div class="round-label">Elite 8</div>
+                        <div class="points">60</div>
+                        <div class="games">4 games</div>
+                    </div>
+                    <div class="scenario scenario-final4">
+                        <div class="round-label">Final Four+</div>
+                        <div class="points">88</div>
+                        <div class="games">6 games</div>
+                    </div>
+                </div>
+            </div>
+            <div class="highlight-bar">
+                <span class="icon">&#127942;</span> Malone Award Top 5 Finalist. First active player inducted into UConn <strong>Huskies of Honor</strong>. Shooting 50/42/88 splits.
+            </div>
+        </div>
+
+        <!-- Pryce Sandfort -->
+        <div class="player-card">
+            <div class="team-stripe" style="background: linear-gradient(90deg, #E41C38, #FFFFFF);"></div>
+            <div class="player-header">
+                <div class="player-info">
+                    <h2>Pryce Sandfort</h2>
+                    <div class="team">Nebraska Cornhuskers <span class="seed">#7 Seed</span></div>
+                </div>
+                <div class="season-ppg">
+                    <div class="number" style="color: #E41C38;">17.8</div>
+                    <div class="label">Season PPG</div>
+                </div>
+            </div>
+            <div class="stats-row">
+                <div class="stat-box">
+                    <div class="stat-value">4.8</div>
+                    <div class="stat-label">RPG</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">2.0</div>
+                    <div class="stat-label">APG</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">47.1%</div>
+                    <div class="stat-label">FG%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">40.1%</div>
+                    <div class="stat-label">3PT%</div>
+                </div>
+            </div>
+            <div class="prediction-section">
+                <div class="prediction-header">
+                    <h3>Tournament Scoring Prediction</h3>
+                    <span class="confidence confidence-high">High Confidence</span>
+                </div>
+                <div class="prediction-scenarios">
+                    <div class="scenario scenario-sweet16">
+                        <div class="round-label">Sweet 16</div>
+                        <div class="points">56</div>
+                        <div class="games">3 games</div>
+                    </div>
+                    <div class="scenario scenario-elite8">
+                        <div class="round-label">Elite 8</div>
+                        <div class="points">76</div>
+                        <div class="games">4 games</div>
+                    </div>
+                    <div class="scenario scenario-final4">
+                        <div class="round-label">Final Four+</div>
+                        <div class="points">112</div>
+                        <div class="games">6 games</div>
+                    </div>
+                </div>
+            </div>
+            <div class="highlight-bar">
+                <span class="icon">&#127919;</span> <strong>113 three-pointers</strong> (7th nationally). Career-high <strong>32 pts</strong> vs Illinois. Tied school record with 8 threes vs Penn State.
+            </div>
+        </div>
+
+        <!-- Kingston Flemings -->
+        <div class="player-card">
+            <div class="team-stripe" style="background: linear-gradient(90deg, #C8102E, #FFFFFF);"></div>
+            <div class="player-header">
+                <div class="player-info">
+                    <h2>Kingston Flemings</h2>
+                    <div class="team">Houston Cougars <span class="seed">#3 Seed</span></div>
+                </div>
+                <div class="season-ppg">
+                    <div class="number" style="color: #C8102E;">16.5</div>
+                    <div class="label">Season PPG</div>
+                </div>
+            </div>
+            <div class="stats-row">
+                <div class="stat-box">
+                    <div class="stat-value">5.4</div>
+                    <div class="stat-label">APG</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">1.5</div>
+                    <div class="stat-label">SPG</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">48.3%</div>
+                    <div class="stat-label">FG%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">37.6%</div>
+                    <div class="stat-label">3PT%</div>
+                </div>
+            </div>
+            <div class="prediction-section">
+                <div class="prediction-header">
+                    <h3>Tournament Scoring Prediction</h3>
+                    <span class="confidence confidence-medium">Medium Confidence</span>
+                </div>
+                <div class="prediction-scenarios">
+                    <div class="scenario scenario-sweet16">
+                        <div class="round-label">Sweet 16</div>
+                        <div class="points">54</div>
+                        <div class="games">3 games</div>
+                    </div>
+                    <div class="scenario scenario-elite8">
+                        <div class="round-label">Elite 8</div>
+                        <div class="points">72</div>
+                        <div class="games">4 games</div>
+                    </div>
+                    <div class="scenario scenario-final4">
+                        <div class="round-label">Final Four+</div>
+                        <div class="points">106</div>
+                        <div class="games">6 games</div>
+                    </div>
+                </div>
+            </div>
+            <div class="highlight-bar">
+                <span class="icon">&#128640;</span> Freshman sensation. <strong>42-pt game</strong> vs Texas Tech (Houston freshman record). Projected <strong>No. 5 NBA Draft pick</strong>. 510 pts breaks school frosh record.
+            </div>
+        </div>
+
+        <!-- Jakobi Gillespie -->
+        <div class="player-card">
+            <div class="team-stripe" style="background: linear-gradient(90deg, #FF8200, #FFFFFF);"></div>
+            <div class="player-header">
+                <div class="player-info">
+                    <h2>Ja'Kobi Gillespie</h2>
+                    <div class="team">Tennessee Volunteers <span class="seed">#4 Seed</span></div>
+                </div>
+                <div class="season-ppg">
+                    <div class="number" style="color: #FF8200;">18.6</div>
+                    <div class="label">Season PPG</div>
+                </div>
+            </div>
+            <div class="stats-row">
+                <div class="stat-box">
+                    <div class="stat-value">2.9</div>
+                    <div class="stat-label">RPG</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">5.4</div>
+                    <div class="stat-label">APG</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">1.6</div>
+                    <div class="stat-label">SPG</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">34</div>
+                    <div class="stat-label">Career High</div>
+                </div>
+            </div>
+            <div class="prediction-section">
+                <div class="prediction-header">
+                    <h3>Tournament Scoring Prediction</h3>
+                    <span class="confidence confidence-high">High Confidence</span>
+                </div>
+                <div class="prediction-scenarios">
+                    <div class="scenario scenario-sweet16">
+                        <div class="round-label">Sweet 16</div>
+                        <div class="points">59</div>
+                        <div class="games">3 games</div>
+                    </div>
+                    <div class="scenario scenario-elite8">
+                        <div class="round-label">Elite 8</div>
+                        <div class="points">80</div>
+                        <div class="games">4 games</div>
+                    </div>
+                    <div class="scenario scenario-final4">
+                        <div class="round-label">Final Four+</div>
+                        <div class="points">118</div>
+                        <div class="games">6 games</div>
+                    </div>
+                </div>
+            </div>
+            <div class="highlight-bar">
+                <span class="icon">&#9889;</span> Career-high <strong>34 pts</strong> vs Texas. Scored 20+ in 4 of last 5 games. 3rd in SEC assists (5.4 APG). Elite two-way guard.
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Prediction Leaderboard -->
+    <div class="leaderboard">
+        <h2>Predicted Tournament Scoring Leaderboard (Full 6-Game Run)</h2>
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Team</th>
+                    <th>Season PPG</th>
+                    <th>Predicted Total</th>
+                    <th>Predicted Avg</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="rank-1">1</td>
+                    <td><strong>Nick Boyd</strong></td>
+                    <td>Wisconsin</td>
+                    <td>20.3</td>
+                    <td><strong>126 pts</strong></td>
+                    <td>21.0</td>
+                    <td><div class="bar-graph"><div class="bar" style="width: 100%;"></div></div></td>
+                </tr>
+                <tr>
+                    <td class="rank-2">2</td>
+                    <td><strong>Ja'Kobi Gillespie</strong></td>
+                    <td>Tennessee</td>
+                    <td>18.6</td>
+                    <td><strong>118 pts</strong></td>
+                    <td>19.7</td>
+                    <td><div class="bar-graph"><div class="bar" style="width: 94%;"></div></div></td>
+                </tr>
+                <tr>
+                    <td class="rank-3">3</td>
+                    <td><strong>Pryce Sandfort</strong></td>
+                    <td>Nebraska</td>
+                    <td>17.8</td>
+                    <td><strong>112 pts</strong></td>
+                    <td>18.7</td>
+                    <td><div class="bar-graph"><div class="bar" style="width: 89%;"></div></div></td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td><strong>Kingston Flemings</strong></td>
+                    <td>Houston</td>
+                    <td>16.5</td>
+                    <td><strong>106 pts</strong></td>
+                    <td>17.7</td>
+                    <td><div class="bar-graph"><div class="bar" style="width: 84%;"></div></div></td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td><strong>Izaiyah Nelson</strong></td>
+                    <td>USF</td>
+                    <td>15.8</td>
+                    <td><strong>98 pts</strong></td>
+                    <td>16.3</td>
+                    <td><div class="bar-graph"><div class="bar" style="width: 78%;"></div></div></td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td><strong>Alex Karaban</strong></td>
+                    <td>UConn</td>
+                    <td>13.3</td>
+                    <td><strong>88 pts</strong></td>
+                    <td>14.7</td>
+                    <td><div class="bar-graph"><div class="bar" style="width: 70%;"></div></div></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Methodology -->
+    <div class="methodology">
+        <h2>Prediction Methodology</h2>
+        <p>Scoring predictions are based on the following factors:</p>
+        <ul>
+            <li><strong>Season PPG baseline:</strong> Each player's 2025-26 regular season scoring average serves as the primary input.</li>
+            <li><strong>Tournament intensity multiplier:</strong> Historical data shows elite scorers tend to see a ~3-8% bump in March Madness due to higher stakes and increased usage. We apply a multiplier of 1.03x for consistent scorers and 1.07x for high-variance players.</li>
+            <li><strong>Opponent strength adjustment:</strong> Higher-seeded teams face weaker opponents early, inflating scoring in rounds 1-2. A -5% adjustment is applied for later rounds against tougher defenses.</li>
+            <li><strong>Conference tournament momentum:</strong> Players who performed well in their conference tournaments (e.g., Boyd's 25 PPG in the Big Ten tourney) receive a slight upward adjustment.</li>
+            <li><strong>Confidence rating:</strong> "High" indicates consistent scorers on favorably seeded teams; "Medium" indicates either high variance or lower seed (tougher path).</li>
+        </ul>
+        <p style="margin-top: 0.75rem; color: var(--accent-blue); font-size: 0.8rem;">
+            Note: Predictions assume each scenario's game count. Actual results depend on team advancement. Data sourced from ESPN, CBS Sports, and official athletic sites as of March 17, 2026.
+        </p>
+    </div>
+
+    <div class="last-updated">
+        Last updated: March 17, 2026 | Data sources: ESPN, CBS Sports, Sports Reference, official team athletics sites
+    </div>
+
+</div>
+
+</body>
+</html>
