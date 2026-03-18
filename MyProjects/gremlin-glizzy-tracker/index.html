@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gremlin Glizzy Tracker</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">Gremlin Glizzy Tracker</h1>
+      <p class="hero-subtitle">Justin Paul &bull; Evan Von Joost &bull; The Gremlins</p>
+      <p class="hero-tagline">Hunting the Best Hot Dogs, Bratwursts &amp; Sausages Across Europe</p>
+    </div>
+  </header>
+
+  <!-- NAV TABS -->
+  <nav class="tab-bar">
+    <button class="tab active" data-tab="leaderboard">Leaderboard</button>
+    <button class="tab" data-tab="map">Map</button>
+    <button class="tab" data-tab="gallery">Gallery</button>
+    <button class="tab" data-tab="add">+ Add Entry</button>
+  </nav>
+
+  <!-- FILTERS -->
+  <div class="filters" id="filters">
+    <select id="filter-country">
+      <option value="">All Countries</option>
+    </select>
+    <select id="filter-city">
+      <option value="">All Cities</option>
+    </select>
+    <select id="filter-region">
+      <option value="">All Regions</option>
+    </select>
+    <select id="filter-type">
+      <option value="">All Types</option>
+      <option value="Hot Dog">Hot Dog</option>
+      <option value="Bratwurst">Bratwurst</option>
+      <option value="Sausage">Sausage</option>
+      <option value="Currywurst">Currywurst</option>
+      <option value="Pølse">Pølse</option>
+      <option value="Kielbasa">Kielbasa</option>
+      <option value="Frankfurter">Frankfurter</option>
+      <option value="Other">Other</option>
+    </select>
+    <select id="filter-reviewer">
+      <option value="">All Gremlins</option>
+      <option value="Justin Paul">Justin Paul</option>
+      <option value="Evan Von Joost">Evan Von Joost</option>
+    </select>
+  </div>
+
+  <main>
+
+    <!-- LEADERBOARD -->
+    <section id="tab-leaderboard" class="tab-content active">
+      <div class="section-header">
+        <h2>Top Ranked Glizzies</h2>
+        <div class="sort-controls">
+          <label>Sort by:</label>
+          <select id="sort-by">
+            <option value="rating">Rating</option>
+            <option value="date">Date</option>
+            <option value="name">Name</option>
+          </select>
+        </div>
+      </div>
+      <div id="leaderboard-list" class="card-grid"></div>
+    </section>
+
+    <!-- MAP -->
+    <section id="tab-map" class="tab-content">
+      <h2>European Glizzy Map</h2>
+      <div class="map-container" id="map-container">
+        <svg id="europe-map" viewBox="0 0 800 600" class="europe-svg">
+          <!-- Simplified Europe outline paths -->
+        </svg>
+        <div id="map-pins"></div>
+      </div>
+      <div id="map-legend" class="map-legend">
+        <div class="legend-item"><span class="legend-dot" style="background:#e74c3c"></span> 9-10 Rating</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#f39c12"></span> 7-8.9 Rating</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#3498db"></span> 5-6.9 Rating</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#95a5a6"></span> Below 5</div>
+      </div>
+    </section>
+
+    <!-- GALLERY -->
+    <section id="tab-gallery" class="tab-content">
+      <h2>The Gremlin Archives</h2>
+      <div class="gallery-grid" id="gallery-grid"></div>
+    </section>
+
+    <!-- ADD ENTRY -->
+    <section id="tab-add" class="tab-content">
+      <h2>Log a New Glizzy</h2>
+      <form id="add-form" class="add-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="entry-name">Spot Name</label>
+            <input type="text" id="entry-name" required placeholder="e.g. John's Hotdog Deli" />
+          </div>
+          <div class="form-group">
+            <label for="entry-dish">Dish Name</label>
+            <input type="text" id="entry-dish" required placeholder="e.g. Ristet Hotdog med det hele" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="entry-type">Type</label>
+            <select id="entry-type" required>
+              <option value="">Select type...</option>
+              <option value="Hot Dog">Hot Dog</option>
+              <option value="Bratwurst">Bratwurst</option>
+              <option value="Sausage">Sausage</option>
+              <option value="Currywurst">Currywurst</option>
+              <option value="Pølse">Pølse</option>
+              <option value="Kielbasa">Kielbasa</option>
+              <option value="Frankfurter">Frankfurter</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="entry-reviewer">Reviewed By</label>
+            <select id="entry-reviewer" required>
+              <option value="">Select gremlin...</option>
+              <option value="Justin Paul">Justin Paul</option>
+              <option value="Evan Von Joost">Evan Von Joost</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="entry-city">City</label>
+            <input type="text" id="entry-city" required placeholder="e.g. Copenhagen" />
+          </div>
+          <div class="form-group">
+            <label for="entry-country">Country</label>
+            <input type="text" id="entry-country" required placeholder="e.g. Denmark" />
+          </div>
+          <div class="form-group">
+            <label for="entry-region">Region</label>
+            <input type="text" id="entry-region" required placeholder="e.g. Scandinavia" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="entry-rating">Rating (1-10)</label>
+            <input type="number" id="entry-rating" min="1" max="10" step="0.1" required placeholder="8.5" />
+          </div>
+          <div class="form-group">
+            <label for="entry-price">Price (local currency)</label>
+            <input type="text" id="entry-price" placeholder="e.g. 45 DKK" />
+          </div>
+          <div class="form-group">
+            <label for="entry-date">Date Visited</label>
+            <input type="date" id="entry-date" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="entry-notes">Notes / Review</label>
+            <textarea id="entry-notes" rows="3" placeholder="Describe the glizzy experience..."></textarea>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="entry-image">Photo URL (optional)</label>
+            <input type="text" id="entry-image" placeholder="Paste an image URL..." />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <h3 class="sub-rating-header">Breakdown Scores (1-10)</h3>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="entry-taste">Taste</label>
+            <input type="number" id="entry-taste" min="1" max="10" step="0.1" placeholder="9" />
+          </div>
+          <div class="form-group">
+            <label for="entry-snap">Snap/Texture</label>
+            <input type="number" id="entry-snap" min="1" max="10" step="0.1" placeholder="8" />
+          </div>
+          <div class="form-group">
+            <label for="entry-toppings">Toppings</label>
+            <input type="number" id="entry-toppings" min="1" max="10" step="0.1" placeholder="7" />
+          </div>
+          <div class="form-group">
+            <label for="entry-vibe">Vibe/Ambiance</label>
+            <input type="number" id="entry-vibe" min="1" max="10" step="0.1" placeholder="8.5" />
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit">Log This Glizzy</button>
+      </form>
+    </section>
+
+  </main>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar">
+    <div class="stat">
+      <span class="stat-num" id="stat-total">0</span>
+      <span class="stat-label">Glizzies Logged</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" id="stat-countries">0</span>
+      <span class="stat-label">Countries</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" id="stat-cities">0</span>
+      <span class="stat-label">Cities</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" id="stat-avg">0</span>
+      <span class="stat-label">Avg Rating</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" id="stat-best">-</span>
+      <span class="stat-label">Top Spot</span>
+    </div>
+  </div>
+
+  <footer>
+    <p>Gremlin Glizzy Tracker &copy; 2026 &mdash; Built by The Gremlins for The Gremlins</p>
+    <p class="footer-small">No glizzy left behind.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
