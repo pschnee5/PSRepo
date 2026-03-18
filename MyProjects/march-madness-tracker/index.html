@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>March Madness 2026 - Player Tracker</title>
+  <style>
+    :root {
+      --bg: #0a0e1a;
+      --card: #141b2d;
+      --card-hover: #1a2340;
+      --accent: #ff6b35;
+      --accent2: #ffd700;
+      --green: #00c853;
+      --red: #ff3d3d;
+      --gray: #8892a4;
+      --text: #e8ecf1;
+      --text-dim: #6b7688;
+      --border: #1e2a42;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1a1a3e 0%, #0d1117 50%, #1a0a00 100%);
+      border-bottom: 2px solid var(--accent);
+      padding: 24px 32px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 40px,
+        rgba(255, 107, 53, 0.03) 40px,
+        rgba(255, 107, 53, 0.03) 41px
+      );
+    }
+
+    .header h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      position: relative;
+    }
+
+    .header .subtitle {
+      color: var(--gray);
+      font-size: 0.95rem;
+      margin-top: 4px;
+      position: relative;
+    }
+
+    .header .date-badge {
+      display: inline-block;
+      background: rgba(255, 107, 53, 0.15);
+      color: var(--accent);
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-top: 8px;
+      border: 1px solid rgba(255, 107, 53, 0.3);
+      position: relative;
+    }
+
+    .scoreboard {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      padding: 20px 32px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .score-stat {
+      text-align: center;
+    }
+
+    .score-stat .value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--accent2);
+    }
+
+    .score-stat .label {
+      font-size: 0.75rem;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 2px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+      padding-left: 4px;
+    }
+
+    .players-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .player-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .player-card:hover {
+      background: var(--card-hover);
+      border-color: rgba(255, 107, 53, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .player-card.eliminated {
+      opacity: 0.5;
+    }
+
+    .player-card.eliminated::after {
+      content: 'ELIMINATED';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-15deg);
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--red);
+      opacity: 0.4;
+      letter-spacing: 4px;
+      pointer-events: none;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+
+    .player-info h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .player-info .team {
+      font-size: 0.85rem;
+      color: var(--gray);
+      margin-top: 2px;
+    }
+
+    .seed-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 107, 53, 0.12);
+      border: 1px solid rgba(255, 107, 53, 0.25);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .status-dot.active {
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+      animation: pulse 2s infinite;
+    }
+
+    .status-dot.eliminated {
+      background: var(--red);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .stat-box {
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 8px;
+      padding: 8px;
+      text-align: center;
+    }
+
+    .stat-box .stat-val {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .stat-box .stat-label {
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+
+    .prediction-section {
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.06), rgba(255, 107, 53, 0.06));
+      border: 1px solid rgba(255, 215, 0, 0.15);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .prediction-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .prediction-header span {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent2);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .prediction-header .proj-total {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--accent2);
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width 0.5s ease;
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+    }
+
+    .projected-path {
+      display: flex;
+      gap: 4px;
+      margin-top: 8px;
+    }
+
+    .round-chip {
+      font-size: 0.65rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-dim);
+      border: 1px solid transparent;
+    }
+
+    .round-chip.projected {
+      background: rgba(0, 200, 83, 0.12);
+      color: var(--green);
+      border-color: rgba(0, 200, 83, 0.25);
+    }
+
+    .round-chip.current {
+      background: rgba(255, 107, 53, 0.15);
+      color: var(--accent);
+      border-color: rgba(255, 107, 53, 0.35);
+      animation: pulse 2s infinite;
+    }
+
+    .round-chip.lost {
+      background: rgba(255, 61, 61, 0.1);
+      color: var(--red);
+      border-color: rgba(255, 61, 61, 0.2);
+      text-decoration: line-through;
+    }
+
+    .tournament-bracket-mini {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .round-labels {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+
+    .round-labels span {
+      text-align: center;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .leaderboard {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 32px;
+    }
+
+    .leaderboard-header {
+      display: grid;
+      grid-template-columns: 40px 2fr 1fr 1fr 1fr 1fr;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .leaderboard-row {
+      display: grid;
+      grid-template-columns: 40px 2fr 1fr 1fr 1fr 1fr;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      align-items: center;
+      transition: background 0.15s;
+    }
+
+    .leaderboard-row:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .leaderboard-row:last-child {
+      border-bottom: none;
+    }
+
+    .rank {
+      font-weight: 800;
+      color: var(--accent2);
+      font-size: 1rem;
+    }
+
+    .lb-player {
+      font-weight: 600;
+    }
+
+    .lb-player .lb-team {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .lb-value {
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .lb-value.highlight {
+      color: var(--accent2);
+      font-weight: 800;
+    }
+
+    .eliminated-row {
+      opacity: 0.45;
+    }
+
+    .eliminated-row .lb-player::after {
+      content: ' (OUT)';
+      color: var(--red);
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
+    .methodology {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 24px;
+    }
+
+    .methodology h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .methodology p {
+      font-size: 0.8rem;
+      color: var(--gray);
+      line-height: 1.6;
+    }
+
+    .methodology ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 8px;
+    }
+
+    .methodology li {
+      font-size: 0.8rem;
+      color: var(--gray);
+      padding: 4px 0;
+      padding-left: 16px;
+      position: relative;
+    }
+
+    .methodology li::before {
+      content: '>';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .control-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .control-btn:hover {
+      background: var(--card-hover);
+      border-color: var(--accent);
+    }
+
+    .control-btn.active {
+      background: rgba(255, 107, 53, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .edit-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .edit-modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      width: 90%;
+      max-width: 420px;
+    }
+
+    .modal-content h3 {
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+      color: var(--accent);
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--gray);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .modal-actions button {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-save {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-cancel {
+      background: transparent;
+      border: 1px solid var(--border) !important;
+      color: var(--gray);
+    }
+
+    .game-log {
+      margin-top: 10px;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .game-log.expanded {
+      max-height: 500px;
+    }
+
+    .game-log-table {
+      width: 100%;
+      font-size: 0.75rem;
+      border-collapse: collapse;
+    }
+
+    .game-log-table th {
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 0.65rem;
+      padding: 4px 6px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .game-log-table td {
+      padding: 4px 6px;
+      text-align: center;
+      color: var(--gray);
+    }
+
+    .toggle-log {
+      display: inline-block;
+      font-size: 0.7rem;
+      color: var(--accent);
+      cursor: pointer;
+      margin-top: 8px;
+      font-weight: 600;
+    }
+
+    .toggle-log:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      .players-grid {
+        grid-template-columns: 1fr;
+      }
+      .leaderboard-header, .leaderboard-row {
+        grid-template-columns: 30px 1.5fr 1fr 1fr 1fr;
+        font-size: 0.75rem;
+      }
+      .scoreboard {
+        gap: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>MARCH MADNESS 2026</h1>
+  <div class="subtitle">Player Scoring Tracker & Predictions</div>
+  <div class="date-badge">Tournament Starts March 19 | Updated: March 17, 2026</div>
+</div>
+
+<div class="scoreboard">
+  <div class="score-stat">
+    <div class="value" id="total-predicted">--</div>
+    <div class="label">Total Predicted Points</div>
+  </div>
+  <div class="score-stat">
+    <div class="value" id="total-actual">0</div>
+    <div class="label">Total Actual Points</div>
+  </div>
+  <div class="score-stat">
+    <div class="value" id="active-count">6</div>
+    <div class="label">Active Players</div>
+  </div>
+  <div class="score-stat">
+    <div class="value" id="eliminated-count">0</div>
+    <div class="label">Eliminated</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="section-title" style="margin-top: 8px;">Prediction Leaderboard</div>
+  <div class="leaderboard" id="leaderboard"></div>
+
+  <div class="section-title">Player Cards</div>
+  <div class="controls">
+    <button class="control-btn active" onclick="sortCards('prediction')">Sort by Prediction</button>
+    <button class="control-btn" onclick="sortCards('ppg')">Sort by PPG</button>
+    <button class="control-btn" onclick="sortCards('seed')">Sort by Seed</button>
+  </div>
+
+  <div class="players-grid" id="players-grid"></div>
+
+  <div class="methodology">
+    <h3>Prediction Methodology</h3>
+    <p>Projected tournament points are calculated based on:</p>
+    <ul>
+      <li>Season PPG with a tournament intensity multiplier (~1.05x for top seeds, reduced for lower seeds facing tougher opponents)</li>
+      <li>Team seed and historical round-by-round win probabilities (e.g., 2-seeds win ~88% of R64, ~67% of R32, ~50% of S16)</li>
+      <li>Expected games = sum of win probabilities for each round the team could play</li>
+      <li>Players on eliminated teams are locked at their actual tournament points scored</li>
+      <li>Click any player card to log actual game scores as the tournament progresses</li>
+    </ul>
+  </div>
+</div>
+
+<div class="edit-modal" id="edit-modal">
+  <div class="modal-content">
+    <h3 id="modal-title">Update Game Score</h3>
+    <div class="form-group">
+      <label>Round</label>
+      <select id="input-round">
+        <option value="R64">Round of 64</option>
+        <option value="R32">Round of 32</option>
+        <option value="S16">Sweet 16</option>
+        <option value="E8">Elite 8</option>
+        <option value="F4">Final Four</option>
+        <option value="CHIP">Championship</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Points Scored</label>
+      <input type="number" id="input-points" min="0" max="80" placeholder="e.g., 24">
+    </div>
+    <div class="form-group">
+      <label>Result</label>
+      <select id="input-result">
+        <option value="win">Win (Advance)</option>
+        <option value="loss">Loss (Eliminated)</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveGame()">Save Game</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ROUND_ORDER = ['R64', 'R32', 'S16', 'E8', 'F4', 'CHIP'];
+const ROUND_NAMES = { R64: 'R64', R32: 'R32', S16: 'S16', E8: 'E8', F4: 'F4', CHIP: 'Final' };
+
+// Historical win probability by seed for each round
+// Based on historical NCAA tournament data
+const WIN_PROB = {
+  1:  [0.99, 0.88, 0.67, 0.50, 0.38, 0.30],
+  2:  [0.94, 0.72, 0.50, 0.35, 0.25, 0.18],
+  3:  [0.85, 0.61, 0.38, 0.22, 0.14, 0.09],
+  4:  [0.79, 0.54, 0.32, 0.18, 0.10, 0.06],
+  5:  [0.64, 0.38, 0.20, 0.10, 0.05, 0.03],
+  6:  [0.63, 0.36, 0.18, 0.09, 0.04, 0.02],
+  7:  [0.60, 0.30, 0.14, 0.06, 0.03, 0.01],
+  8:  [0.50, 0.25, 0.11, 0.05, 0.02, 0.01],
+  9:  [0.50, 0.24, 0.10, 0.04, 0.02, 0.01],
+  10: [0.40, 0.19, 0.08, 0.03, 0.01, 0.005],
+  11: [0.37, 0.16, 0.07, 0.03, 0.01, 0.004],
+  12: [0.36, 0.14, 0.05, 0.02, 0.01, 0.003],
+  13: [0.21, 0.06, 0.02, 0.005, 0.002, 0.001],
+  14: [0.15, 0.03, 0.01, 0.003, 0.001, 0.0003],
+  15: [0.07, 0.01, 0.003, 0.001, 0.0003, 0.0001],
+  16: [0.02, 0.003, 0.001, 0.0002, 0.0001, 0.00003]
+};
+
+// Team-specific adjustments for 2026 (positive = overperform seed expectations)
+const TEAM_BOOST = {
+  'Houston': 0.10,    // Very strong 2-seed, could be a 1
+  'UConn': 0.08,      // Tournament pedigree, back-to-back champs recently
+  'Tennessee': 0.05,  // Back-to-back Elite 8 experience
+  'Nebraska': 0.0,    // First tournament appearance in years
+  'Wisconsin': 0.0,   // Standard
+  'USF': 0.03         // Strong late-season run, experienced roster
+};
+
+const STORAGE_KEY = 'mm2026_players';
+
+function getDefaultPlayers() {
+  return [
+    {
+      id: 'nelson',
+      name: 'Izaiyah Nelson',
+      team: 'USF',
+      conference: 'American',
+      seed: 11,
+      region: 'East',
+      ppg: 15.8,
+      rpg: 9.8,
+      seasonGames: 33,
+      seasonPoints: 521,
+      fg_pct: 56.2,
+      status: 'active',
+      tourneyGames: [],
+      awards: 'Player of the Year, DPOY, Newcomer of the Year (AAC)'
+    },
+    {
+      id: 'boyd',
+      name: 'Nick Boyd',
+      team: 'Wisconsin',
+      conference: 'Big Ten',
+      seed: 5,
+      region: 'West',
+      ppg: 20.3,
+      rpg: 3.8,
+      seasonGames: 34,
+      seasonPoints: 699,
+      fg_pct: 48.0,
+      status: 'active',
+      tourneyGames: [],
+      awards: '2nd Team All-Big Ten, 1st Badger to avg 20 PPG since Finley (1995)'
+    },
+    {
+      id: 'karaban',
+      name: 'Alex Karaban',
+      team: 'UConn',
+      conference: 'Big East',
+      seed: 2,
+      region: 'East',
+      ppg: 12.9,
+      rpg: 5.3,
+      seasonGames: 34,
+      seasonPoints: 439,
+      fg_pct: 47.9,
+      status: 'active',
+      tourneyGames: [],
+      awards: 'Malone Award Top 5, 1st Team All-Big East, UConn all-time wins leader'
+    },
+    {
+      id: 'sandfort',
+      name: 'Pryce Sandfort',
+      team: 'Nebraska',
+      conference: 'Big Ten',
+      seed: 4,
+      region: 'South',
+      ppg: 17.8,
+      rpg: 4.8,
+      seasonGames: 32,
+      seasonPoints: 570,
+      fg_pct: 45.0,
+      status: 'active',
+      tourneyGames: [],
+      awards: '1st Team All-Big Ten, School record 113 three-pointers'
+    },
+    {
+      id: 'flemings',
+      name: 'Kingston Flemings',
+      team: 'Houston',
+      conference: 'Big 12',
+      seed: 2,
+      region: 'South',
+      ppg: 16.5,
+      rpg: 3.9,
+      seasonGames: 34,
+      seasonPoints: 561,
+      fg_pct: 48.3,
+      status: 'active',
+      tourneyGames: [],
+      awards: 'All-America 2nd Team, Freshman scoring record at Houston'
+    },
+    {
+      id: 'gillespie',
+      name: "Ja'Kobi Gillespie",
+      team: 'Tennessee',
+      conference: 'SEC',
+      seed: 6,
+      region: 'Midwest',
+      ppg: 18.0,
+      rpg: 2.8,
+      seasonGames: 33,
+      seasonPoints: 594,
+      fg_pct: 40.7,
+      status: 'active',
+      tourneyGames: [],
+      awards: '2nd Team All-SEC, back-to-back Elite 8 team'
+    }
+  ];
+}
+
+function loadPlayers() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try { return JSON.parse(saved); } catch(e) {}
+  }
+  return getDefaultPlayers();
+}
+
+function savePlayers() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
+}
+
+let players = loadPlayers();
+let editingPlayerId = null;
+
+function calcPrediction(player) {
+  const seed = player.seed;
+  const probs = WIN_PROB[seed] || WIN_PROB[16];
+  const boost = TEAM_BOOST[player.team] || 0;
+
+  // Tournament intensity multiplier: players often score slightly more under tourney pressure
+  // Higher seeds face weaker opponents early, so slight boost
+  const intensityMult = seed <= 4 ? 1.05 : seed <= 8 ? 1.02 : 0.98;
+
+  const tourneyPPG = player.ppg * intensityMult;
+
+  // Calculate expected games remaining
+  const gamesPlayed = player.tourneyGames.length;
+  const actualPoints = player.tourneyGames.reduce((s, g) => s + g.points, 0);
+
+  if (player.status === 'eliminated') {
+    return { expectedGames: gamesPlayed, predictedPoints: actualPoints, tourneyPPG, roundProbs: probs };
+  }
+
+  // Expected games from current round onward
+  let expectedRemainingGames = 0;
+  for (let i = gamesPlayed; i < 6; i++) {
+    const adjProb = Math.min(1, probs[i] + boost);
+    expectedRemainingGames += adjProb;
+  }
+
+  const predictedRemaining = Math.round(expectedRemainingGames * tourneyPPG);
+  const predictedPoints = actualPoints + predictedRemaining;
+
+  return {
+    expectedGames: gamesPlayed + expectedRemainingGames,
+    predictedPoints,
+    tourneyPPG,
+    roundProbs: probs.map((p, i) => Math.min(1, p + boost))
+  };
+}
+
+function renderLeaderboard() {
+  const lb = document.getElementById('leaderboard');
+  const sorted = [...players].sort((a, b) => {
+    const pa = calcPrediction(a).predictedPoints;
+    const pb = calcPrediction(b).predictedPoints;
+    return pb - pa;
+  });
+
+  let html = `
+    <div class="leaderboard-header">
+      <span>#</span>
+      <span>Player</span>
+      <span style="text-align:center">PPG</span>
+      <span style="text-align:center">Seed</span>
+      <span style="text-align:center">Tourney Pts</span>
+      <span style="text-align:center">Predicted Total</span>
+    </div>
+  `;
+
+  sorted.forEach((p, i) => {
+    const pred = calcPrediction(p);
+    const actualPts = p.tourneyGames.reduce((s, g) => s + g.points, 0);
+    const elim = p.status === 'eliminated' ? 'eliminated-row' : '';
+    html += `
+      <div class="leaderboard-row ${elim}">
+        <span class="rank">${i + 1}</span>
+        <div class="lb-player">
+          ${p.name}
+          <div class="lb-team">${p.team} (${p.conference})</div>
+        </div>
+        <span class="lb-value">${p.ppg}</span>
+        <span class="lb-value">${p.seed}</span>
+        <span class="lb-value">${actualPts}</span>
+        <span class="lb-value highlight">${pred.predictedPoints}</span>
+      </div>
+    `;
+  });
+
+  lb.innerHTML = html;
+}
+
+function renderCards(sortBy = 'prediction') {
+  const grid = document.getElementById('players-grid');
+  let sorted = [...players];
+
+  if (sortBy === 'prediction') {
+    sorted.sort((a, b) => calcPrediction(b).predictedPoints - calcPrediction(a).predictedPoints);
+  } else if (sortBy === 'ppg') {
+    sorted.sort((a, b) => b.ppg - a.ppg);
+  } else if (sortBy === 'seed') {
+    sorted.sort((a, b) => a.seed - b.seed);
+  }
+
+  grid.innerHTML = sorted.map(p => {
+    const pred = calcPrediction(p);
+    const actualPts = p.tourneyGames.reduce((s, g) => s + g.points, 0);
+    const progress = pred.predictedPoints > 0 ? (actualPts / pred.predictedPoints * 100) : 0;
+    const elimClass = p.status === 'eliminated' ? 'eliminated' : '';
+
+    const roundChips = ROUND_ORDER.map((r, i) => {
+      const game = p.tourneyGames.find(g => g.round === r);
+      if (game) {
+        return `<span class="round-chip ${game.result === 'win' ? 'projected' : 'lost'}">${ROUND_NAMES[r]}: ${game.points}pts</span>`;
+      } else if (p.status === 'eliminated') {
+        return `<span class="round-chip">${ROUND_NAMES[r]}</span>`;
+      } else if (i === p.tourneyGames.length) {
+        return `<span class="round-chip current">${ROUND_NAMES[r]}: Next</span>`;
+      } else {
+        return `<span class="round-chip">${ROUND_NAMES[r]}</span>`;
+      }
+    }).join('');
+
+    const gameLogRows = p.tourneyGames.map(g => `
+      <tr>
+        <td>${ROUND_NAMES[g.round]}</td>
+        <td>${g.points}</td>
+        <td style="color: ${g.result === 'win' ? 'var(--green)' : 'var(--red)'}">${g.result === 'win' ? 'W' : 'L'}</td>
+      </tr>
+    `).join('');
+
+    return `
+      <div class="player-card ${elimClass}" onclick="openModal('${p.id}')" style="cursor:pointer">
+        <div class="card-top">
+          <div class="player-info">
+            <h3>${p.name}</h3>
+            <div class="team">${p.team} | ${p.conference} | ${p.region} Region</div>
+          </div>
+          <div class="seed-badge">
+            <span class="status-dot ${p.status === 'active' ? 'active' : 'eliminated'}"></span>
+            #${p.seed} Seed
+          </div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="stat-val">${p.ppg}</div>
+            <div class="stat-label">PPG</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val">${p.rpg}</div>
+            <div class="stat-label">RPG</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val">${p.fg_pct}%</div>
+            <div class="stat-label">FG%</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val">${p.seasonPoints}</div>
+            <div class="stat-label">Season Pts</div>
+          </div>
+        </div>
+        <div class="prediction-section">
+          <div class="prediction-header">
+            <span>Tournament Prediction</span>
+            <span class="proj-total">${pred.predictedPoints} pts</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${Math.min(100, progress)}%"></div>
+          </div>
+          <div class="progress-labels">
+            <span>${actualPts} scored</span>
+            <span>${pred.expectedGames.toFixed(1)} expected games</span>
+          </div>
+          <div class="projected-path">${roundChips}</div>
+        </div>
+        ${p.tourneyGames.length > 0 ? `
+          <span class="toggle-log" onclick="event.stopPropagation(); this.nextElementSibling.classList.toggle('expanded'); this.textContent = this.nextElementSibling.classList.contains('expanded') ? 'Hide Game Log' : 'Show Game Log'">Show Game Log</span>
+          <div class="game-log">
+            <table class="game-log-table">
+              <thead><tr><th>Round</th><th>Pts</th><th>Result</th></tr></thead>
+              <tbody>${gameLogRows}</tbody>
+            </table>
+          </div>
+        ` : '<div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 8px;">Click to add game scores once tournament begins</div>'}
+      </div>
+    `;
+  }).join('');
+}
+
+function updateScoreboard() {
+  let totalPredicted = 0;
+  let totalActual = 0;
+  let activeCount = 0;
+  let elimCount = 0;
+
+  players.forEach(p => {
+    const pred = calcPrediction(p);
+    totalPredicted += pred.predictedPoints;
+    totalActual += p.tourneyGames.reduce((s, g) => s + g.points, 0);
+    if (p.status === 'active') activeCount++;
+    else elimCount++;
+  });
+
+  document.getElementById('total-predicted').textContent = totalPredicted;
+  document.getElementById('total-actual').textContent = totalActual;
+  document.getElementById('active-count').textContent = activeCount;
+  document.getElementById('eliminated-count').textContent = elimCount;
+}
+
+function openModal(playerId) {
+  const player = players.find(p => p.id === playerId);
+  if (!player || player.status === 'eliminated') return;
+  editingPlayerId = playerId;
+  document.getElementById('modal-title').textContent = `Log Game: ${player.name}`;
+
+  // Set default round to next unplayed
+  const nextRoundIdx = player.tourneyGames.length;
+  if (nextRoundIdx < ROUND_ORDER.length) {
+    document.getElementById('input-round').value = ROUND_ORDER[nextRoundIdx];
+  }
+  document.getElementById('input-points').value = '';
+  document.getElementById('input-result').value = 'win';
+  document.getElementById('edit-modal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('edit-modal').classList.remove('show');
+  editingPlayerId = null;
+}
+
+function saveGame() {
+  if (!editingPlayerId) return;
+  const player = players.find(p => p.id === editingPlayerId);
+  if (!player) return;
+
+  const round = document.getElementById('input-round').value;
+  const points = parseInt(document.getElementById('input-points').value) || 0;
+  const result = document.getElementById('input-result').value;
+
+  // Prevent duplicate rounds
+  if (player.tourneyGames.find(g => g.round === round)) {
+    alert('Game for this round already logged. Remove it first to re-enter.');
+    return;
+  }
+
+  player.tourneyGames.push({ round, points, result });
+
+  if (result === 'loss') {
+    player.status = 'eliminated';
+  }
+
+  savePlayers();
+  renderAll();
+  closeModal();
+}
+
+function sortCards(sortBy) {
+  document.querySelectorAll('.control-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderCards(sortBy);
+}
+
+function renderAll() {
+  renderLeaderboard();
+  renderCards();
+  updateScoreboard();
+}
+
+// Reset button (hidden, use console: resetData())
+window.resetData = function() {
+  localStorage.removeItem(STORAGE_KEY);
+  players = getDefaultPlayers();
+  renderAll();
+};
+
+renderAll();
+</script>
+
+</body>
+</html>
