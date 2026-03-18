@@ -270,6 +270,16 @@ function loadEntries() {
   const stored = localStorage.getItem('glizzy-entries');
   if (stored) {
     entries = JSON.parse(stored);
+    // Sync seed entries with latest data (images, reviewer names, etc.)
+    const seedMap = {};
+    SEED_DATA.forEach(s => { seedMap[s.id] = s; });
+    entries = entries.map(e => {
+      if (seedMap[e.id]) {
+        return { ...seedMap[e.id], ...e, image: seedMap[e.id].image, reviewer: seedMap[e.id].reviewer };
+      }
+      return e;
+    });
+    saveEntries();
   } else {
     entries = [...SEED_DATA];
     saveEntries();
